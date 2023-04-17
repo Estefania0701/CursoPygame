@@ -11,7 +11,43 @@ PANTALLA = pygame.display.set_mode((W, H))
 
 # --------- TÍTULO E ÍCONO
 pygame.display.set_caption("Jueguito")
+icono = pygame.image.load("recursos/icono.png") # cargo la imagen
+pygame.display.set_icon(icono)
 
+# --------- FONDO
+# importante que el tamaño en píxeles de la imagen coincida con el de la ventana
+fondo = pygame.image.load("recursos/fondos/abandonCity/ajustado.png").convert() #convert optimiza el juego
+
+# ---------- PERSONAJE
+quieto = pygame.image.load("recursos/sprites/personaje/idle1.png")
+
+
+# ------------------------------- ANIMACIONES -------------------------
+
+# ---------- HACIA LA DERECHA
+caminaDerecha = [pygame.image.load("recursos/sprites/personaje/run1.png"),
+                 pygame.image.load("recursos/sprites/personaje/run2.png"),
+                 pygame.image.load("recursos/sprites/personaje/run3.png"),
+                 pygame.image.load("recursos/sprites/personaje/run4.png"),
+                 pygame.image.load("recursos/sprites/personaje/run5.png"),
+                 pygame.image.load("recursos/sprites/personaje/run6.png")]
+
+# ---------- HACIA LA IZQUIERDA
+caminaDerecha = [pygame.image.load("recursos/sprites/personaje/run1-izq.png"),
+                 pygame.image.load("recursos/sprites/personaje/run2-izq.png"),
+                 pygame.image.load("recursos/sprites/personaje/run3-izq.png"),
+                 pygame.image.load("recursos/sprites/personaje/run4-izq.png"),
+                 pygame.image.load("recursos/sprites/personaje/run5-izq.png"),
+                 pygame.image.load("recursos/sprites/personaje/run6-izq.png")]
+
+# ---------- SALTA
+salta = [pygame.image.load("recursos/sprites/personaje/jump1.png"),
+         pygame.image.load("recursos/sprites/personaje/jump2.png")]
+
+
+# Para ajustar los FPS del juego
+FPS = 60
+RELOJ = pygame.time.Clock()
 
 # paleta de colores RGB (en mayúsculas porque son constantes)
 BLANCO = (255, 255, 255)
@@ -58,6 +94,10 @@ puntos = [(300, 300), (300, 100), (350, 100)]
 pygame.draw.polygon(PANTALLA, (0, 150, 255), puntos, 8)
 
 
+
+
+x = 0
+
 # bucle para ejecutar la pantalla
 while True:
     # registrando todos los eventos del sistema
@@ -65,7 +105,15 @@ while True:
         # cerrar la pantalla
         if event.type == pygame.QUIT:
             sys.exit()
+    # para que el fondo se mueva
+    x_relativa = x % fondo.get_rect().width # obtengo el ancho del fondo y lo divido por x
+    PANTALLA.blit(fondo, (x_relativa - fondo.get_rect().width, 0))
 
+    # para el desplazamiento infinito del fondo
+    if x_relativa < W:
+        PANTALLA.blit(fondo, (x_relativa, 0))
+    x -= 1
     # para que se actualice la pantalla constantemente
     pygame.display.update()
 
+    RELOJ.tick(FPS)
