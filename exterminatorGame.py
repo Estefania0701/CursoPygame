@@ -33,7 +33,7 @@ caminaDerecha = [pygame.image.load("recursos/sprites/personaje/run1.png"),
                  pygame.image.load("recursos/sprites/personaje/run6.png")]
 
 # ---------- HACIA LA IZQUIERDA
-caminaDerecha = [pygame.image.load("recursos/sprites/personaje/run1-izq.png"),
+caminaIzquierda = [pygame.image.load("recursos/sprites/personaje/run1-izq.png"),
                  pygame.image.load("recursos/sprites/personaje/run2-izq.png"),
                  pygame.image.load("recursos/sprites/personaje/run3-izq.png"),
                  pygame.image.load("recursos/sprites/personaje/run4-izq.png"),
@@ -44,76 +44,123 @@ caminaDerecha = [pygame.image.load("recursos/sprites/personaje/run1-izq.png"),
 salta = [pygame.image.load("recursos/sprites/personaje/jump1.png"),
          pygame.image.load("recursos/sprites/personaje/jump2.png")]
 
-
-# Para ajustar los FPS del juego
-FPS = 60
-RELOJ = pygame.time.Clock()
-
-# paleta de colores RGB (en mayúsculas porque son constantes)
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
-ROJO = (255, 0, 0)
-AZUL = (0, 0, 255)
-VERDE = (0, 255, 0)
-H3DBE9A = (61, 190, 154)
-H9285A9 = (146, 133, 169)
-
-# --------- coloreando la pantalla
-PANTALLA.fill(BLANCO)
-
-# --------- dibujando un rectángulo
-# (pantalla, color, (X, Y, largo, alto)) ----> las medidas son en pixeles
-rectangulo1 = pygame.draw.rect(PANTALLA, ROJO, (100, 50, 100, 50))
-
-# --------- dibujando una línea
-# (pantalla, color, (X, Y), (X, Y), grosor en px)
-# las primeras coordenadas son donde comienza la línea
-# las segundas donde termina
-pygame.draw.line(PANTALLA, VERDE, (100, 50), (200, 100), 4)
-
-# --------- dibujando un circulo
-# (pantalla, color, (X, Y), radio, relleno)
-# las coordenadas son para el centro del circulo
-# relleno en 0: quedará coloreado por completo
-# entre más grande el número del relleno, más píxeles sin colorear por dentro
-# por eje: 10 serán 10 píxeles por radio sin relleno
-pygame.draw.circle(PANTALLA, NEGRO, (120, 120), 20, 10)
-
-# --------- dibujando una elipse
-# (pantalla, color (X, Y, ancho x, largo y), grosor)
-pygame.draw.ellipse(PANTALLA, H9285A9, (200, 200, 40, 80), 10)
-
-
-# --------- dibujando polígonos
-# los puntos son tuplas de x, y
-# linea
-puntos = [(50, 300), (50, 100)]
-pygame.draw.polygon(PANTALLA, (0, 150, 255), puntos, 8)
-# triángulo
-puntos = [(300, 300), (300, 100), (350, 100)]
-pygame.draw.polygon(PANTALLA, (0, 150, 255), puntos, 8)
-
-
-
-
 x = 0
+px = 50
+py = 200
+ancho = 40
+velocidad = 10
 
-# bucle para ejecutar la pantalla
-while True:
-    # registrando todos los eventos del sistema
-    for event in pygame.event.get():
-        # cerrar la pantalla
-        if event.type == pygame.QUIT:
-            sys.exit()
-    # para que el fondo se mueva
-    x_relativa = x % fondo.get_rect().width # obtengo el ancho del fondo y lo divido por x
+# Control de FPS
+reloj = pygame.time.Clock()
+
+# variables salto
+salto = False
+# altura del salto
+cuentaSalto = 10
+
+# variables dirección
+izquierda = False
+derecha = False
+
+# pasos
+cuentaPasos = 0
+
+# movimiento
+def recargaPantalla():
+    # variables globales
+    global cuentaPasos
+    global x
+
+    # fondo en movimiento
+    x_relativa = x % fondo.get_rect().width
     PANTALLA.blit(fondo, (x_relativa - fondo.get_rect().width, 0))
-
-    # para el desplazamiento infinito del fondo
     if x_relativa < W:
         PANTALLA.blit(fondo, (x_relativa, 0))
-    x -= 1
-    # para que se actualice la pantalla constantemente
+    x -= 5
+
+    # contador de pasos
+    if cuentaPasos + 1 >= 6: # 6 por ser 6 imagenes de run
+        cuentaPasos = 0
+
+    # movimiento a la izquierda
+    if izquierda:
+        PANTALLA.blit(caminaIzquierda[cuentaPasos // 1], (int(px), int(py)))
+        cuentaPasos += 1
+    # movimiento a la derecha
+    elif derecha:
+        PANTALLA.blit(caminaDerecha[cuentaPasos // 1], (int(px), int(py)))
+        cuentaPasos += 1
+    elif salto + 1 >= 2: # 2 porque solo hay 2 imágenes de jump
+        cuentaPasos = 0
+        PANTALLA.blit(salta[cuentaPasos // 1], (int(px), int(py)))
+        cuentaPasos += 1
+    else:
+        PANTALLA.blit(quieto, (int(px), int(py)))
+
+    # actualización de la ventana
     pygame.display.update()
 
-    RELOJ.tick(FPS)
+ejecuta = True
+
+# bucle de acciones y controles
+while ejecuta:
+    # FPS
+    reloj.tick(18)
+
+    # Bucle del juego
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            ejecuta = False
+
+    # tecla pulsada
+    keys = pygame.key.get_pressed()
+
+    # tecla A - Movimiento a a izquierda
+    if keys[pygame.K_a] and px > velocidad:
+        px -= velocidad
+        izquierda = True
+        derecha = False
+    # tecla D - Movimiento a la derecha
+    elif keys[pygame.K_d] and px < (900 - velocidad - ancho):
+        px += velocidad
+        izquierda = False
+        derecha = True
+    # personaje quieto:
+    else:
+        izquierda = False
+        derecha = False
+        cuentaPasos = 0
+
+    # Tecla W - movimiento hacia arriba
+    if keys[pygame.K_w] and py > 100:
+        py -= velocidad
+
+    # Tecla S - movimiento hacia abajo
+    if keys[pygame.K_s] and py < 300:
+        py += velocidad
+
+    # Tecla SPACE - SALTO
+    if not (salto):
+        if keys[pygame.K_SPACE]:
+            salto = True
+            izquierda = False
+            derecha = False
+            cuentaPasos = 0
+    else:
+        if cuentaSalto >= -10:
+            py -= (cuentaSalto * abs(cuentaSalto)) * 0.5
+            cuentaSalto -= 1
+        else:
+            cuentaSalto = 10
+            salto = False
+
+    # llamada a la función de actualización de la ventana
+    recargaPantalla()
+
+# salida del juego
+pygame.quit()
+
+
+
+
+# salida del juego
