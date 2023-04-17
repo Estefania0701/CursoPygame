@@ -8,6 +8,9 @@ pygame.init()
 # creando una pantalla (ancho por alto en pixeles)
 W, H = 1000, 600
 PANTALLA = pygame.display.set_mode((W, H))
+# para ajustar los FPS del juego
+FPS = 60
+RELOJ = pygame.time.Clock()
 
 # título de la pantalla
 pygame.display.set_caption("Mi primera ventana")
@@ -76,7 +79,11 @@ while True:
             sys.exit()
     # para que el fondo se mueva
     x_relativa = x % fondo.get_rect().width # obtengo el ancho del fondo y lo divido por x
-    PANTALLA.blit(fondo, (x, 0))
-    x -= 1
+    PANTALLA.blit(fondo, (x_relativa - fondo.get_rect().width, 0))
+
+    if x_relativa < W:
+        PANTALLA.blit(fondo, (x_relativa, 0))
+    x -= 5
     # para que se actualice la pantalla constantemente
-    pygame.display.flip()
+    pygame.display.update()
+    RELOJ.tick(FPS)
