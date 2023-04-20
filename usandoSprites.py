@@ -39,7 +39,17 @@ class Jugador (pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         # Centro el rectángulo (jugador)
-        self.rect.center = (ANCHO // 2, ALTO // 2)
+        # mediante división para que cambie si modifico ANCHO y ALTO después
+        self.rect.center = (ANCHO // 2, ALTO // 2) # (300, 400)
 
     def update(self):
-        pass
+        # Actualiza esto cada vuelta de bucle
+
+        """ Actualizo la posición del rectángulo del jugador en el eje y,
+        moviéndolo hacia abajo en la ventana del juego."""
+        self.rect.y += 10
+
+        """ Verifico si el borde superior del rectángulo del jugador ha 
+        pasado el borde inferior de la ventana del juego"""
+        if self.rect.top > ALTO:
+            self.rect.bottom = 0 # Su posición se restablece en la parte superior de la ventana
