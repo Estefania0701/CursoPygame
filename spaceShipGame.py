@@ -1,4 +1,5 @@
 import pygame
+import random
 
 # Tamaño de pantalla
 ANCHO = 800
@@ -102,7 +103,29 @@ class Jugador(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
+class Enemigo(pygame.sprite.Sprite):
+    # crea los objetos enemigos
 
+    def __init__(self):
+
+        super().__init__()
+
+        # cargo la imagen
+        self.image = pygame.image.load("recursos/juego_spaceShip/enemy.png")
+
+        # la redimensiono
+        self.image = pygame.transform.scale(self.image, (70, 35))
+
+        # la convierto para optimizarla
+        self.image.convert()
+
+        # obtengo el rectángulo que rodea la imagen
+        self.rect = self.image.get_rect()
+
+        # -------------- APARICIÓN EN POSICIÓN ALEATORIA --------------
+        # les resto el ancho para que no se salga del borde de la ventana
+        self.rect.x = random.randrange(ANCHO - self.rect.width)
+        self.rect.y = random.randrange(ALTO - self.rect.height)
 
 # ------------------------------------------------------------------------
 
@@ -127,6 +150,16 @@ clock = pygame.time.Clock()
 para manejar y actualizar varios sprites simultáneamente"""
 sprites = pygame.sprite.Group()
 
+# -------------- ENEMIGOS
+# los ubico de primeras para que el jugador quede en la capa superior
+
+# rango de 0 a 5 (+1 es para que siempre aparezca por lo menos 1 enemigo)
+for i in range(random.randrange(4) + 1):
+    enemigo = Enemigo()
+    sprites.add(enemigo)
+
+# ------------- JUGADOR
+
 # Creo un objeto de tipo Jugador
 jugador = Jugador()
 
@@ -134,6 +167,7 @@ jugador = Jugador()
 jugador sea actualizado y dibujado en la ventana del juego junto con otros 
 sprites que puedan estar presentes en el grupo sprites"""
 sprites.add(jugador)
+
 
 # ----------------------- BUCLE PRINCIPAL DEL JUEGO ---------------------------
 
