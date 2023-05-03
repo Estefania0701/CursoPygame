@@ -90,24 +90,24 @@ class Jugador(pygame.sprite.Sprite):
 
         # ------------------ MARGENES DE MOVIMIENTO ----------------------
 
-        # si el lado izquierdo del rectángulo sobrepasa el borde izquierdo
-        if self.rect.left < 0:
-            self.rect.left = 0
         # si el lado derecho del rectángulo sobrepasa el borde derecho
         if self.rect.right > ANCHO:
-            self.rect.right = ANCHO
+            self.rect.right = ANCHO # establezco la pos del lado derecho igual que el ANCHO
+        # si el lado izquierdo del rectángulo sobrepasa el borde izquierdo
+        if self.rect.left < 0:
+            self.rect.left = 0  # establezo la pos del lado izquierdo en 0
         # si el lado inferior del rectángulo sobrepasa el borde inferior
         if self.rect.bottom > ALTO:
-            self.rect.bottom = ALTO
+            self.rect.bottom = ALTO # establezo la pos del lado inferior igual que el ALTO
         # si el lado superior del rectángulo sobrepasa el borde superior
         if self.rect.top < 0:
-            self.rect.top = 0
+            self.rect.top = 0 # establezo la pos del lado superior en 0
+
 
 class Enemigo(pygame.sprite.Sprite):
     # crea los objetos enemigos
 
     def __init__(self):
-
         super().__init__()
 
         # cargo la imagen
@@ -126,6 +126,24 @@ class Enemigo(pygame.sprite.Sprite):
         # les resto el ancho para que no se salga del borde de la ventana
         self.rect.x = random.randrange(ANCHO - self.rect.width)
         self.rect.y = random.randrange(ALTO - self.rect.height)
+
+        # velocidad del enemigo
+        self.posicion_x = random.randrange(1,10)
+        self.posicion_y = random.randrange(1,10)
+
+    def update(self):
+        # Actualizo la posición (velocidad) del enemigo
+        self.rect.x += self.posicion_x
+        self.rect.y += self.posicion_y
+
+       # ------------------ MARGENES DE MOVIMIENTO ----------------------
+
+        # al llegar a los bordes derecho o izquierdo
+        if self.rect.right > ANCHO or self.rect.left < 0:
+            self.posicion_x *= -1  # invierto la dirección en x
+        # al llegar a los bordes inferior o superior
+        if self.rect.bottom > ALTO or self.rect.top < 0:
+            self.posicion_y *= -1  # invierto la dirección en y
 
 # ------------------------------------------------------------------------
 
@@ -167,7 +185,6 @@ jugador = Jugador()
 jugador sea actualizado y dibujado en la ventana del juego junto con otros 
 sprites que puedan estar presentes en el grupo sprites"""
 sprites.add(jugador)
-
 
 # ----------------------- BUCLE PRINCIPAL DEL JUEGO ---------------------------
 
