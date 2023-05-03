@@ -168,13 +168,15 @@ clock = pygame.time.Clock()
 para manejar y actualizar varios sprites simultáneamente"""
 sprites = pygame.sprite.Group()
 
+enemigos = pygame.sprite.Group()
+
 # -------------- ENEMIGOS
 # los ubico de primeras para que el jugador quede en la capa superior
 
 # rango de 0 a 5 (+1 es para que siempre aparezca por lo menos 1 enemigo)
 for i in range(random.randrange(4) + 1):
     enemigo = Enemigo()
-    sprites.add(enemigo)
+    enemigos.add(enemigo)
 
 # ------------- JUGADOR
 
@@ -202,12 +204,14 @@ while ejecutando:
 
     # Actualizo el estado de cada sprite en el juego
     sprites.update()
+    enemigos.update()
 
     # Relleno la pantalla de color negro
     pantalla.fill(NEGRO)
 
     # Dibujo los sprites en la pantalla, con el método draw del grupo de sprites
     sprites.draw(pantalla)
+    enemigos.draw(pantalla)
 
     # Dibujo 2 líneas para crear un plano cartesiano
     pygame.draw.line(pantalla, H_50D2FE, (400, 0), (400, 800), 1)
