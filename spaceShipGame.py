@@ -93,7 +93,7 @@ class Jugador(pygame.sprite.Sprite):
         # disparo
         if teclas[pygame.K_SPACE]:
             self.disparar()
-            self.disparar_alas()
+            #self.disparar_alas() # para disparar desde las alas
 
         # Actualizo la posición del personaje
         self.rect.x += self.posicion_x
@@ -271,9 +271,16 @@ while ejecutando:
     enemigos.update()
     balas.update()
 
+    # ------------------------------ COLISIONES -----------------------------------
+
     # Colisiones (el objeto que provoca la colisión, grupo de sprites colisionados)
     # False es para que no se elimine el objeto enemigo
-    colision = pygame.sprite.spritecollide(jugador, enemigos, False)
+
+    # Para colisión entre 2 sprites (jugador y un enemigo)
+    colision_nave = pygame.sprite.spritecollide(jugador, enemigos, False)
+
+    # Para colisión entre grupos de sprites (enemigos y balas)
+    colision = pygame.sprite.groupcollide(enemigos, balas, False, True)
 
     # Si se produce una colisión
     if colision:
@@ -291,12 +298,10 @@ while ejecutando:
     elif enemigo.rect.top > ALTO:
         enemigo.kill()
 
-
     # Dibujo los sprites en la pantalla, con el método draw del grupo de sprites
     sprites.draw(pantalla)
     enemigos.draw(pantalla)
     balas.draw(pantalla)
-
 
     # Actualizo la ventana con los cambios realizados
     pygame.display.flip()
