@@ -2,7 +2,7 @@ import pygame
 import random
 
 # Tamaño de pantalla
-ANCHO = 800
+ANCHO = 1000
 ALTO = 600
 
 # FPS
@@ -17,6 +17,12 @@ VERDE = (0, 255, 0)
 AZUL = (0, 0, 255)
 H_50D2FE = (94, 210, 244)
 
+# --------- FONDO
+# importante que el tamaño en píxeles de la imagen coincida con el de la ventana
+fondo = pygame.image.load("recursos/juego_spaceShip/fondo_space.jpg")
+
+# esclalo el fondo al tamaño de la ventana
+fondo = pygame.transform.scale(fondo, (ANCHO, ALTO))
 
 class Jugador(pygame.sprite.Sprite):
     """ Hereda métodos y atributos de la clase Sprite de Pygame
@@ -84,6 +90,11 @@ class Jugador(pygame.sprite.Sprite):
         if teclas[pygame.K_s]:
             self.posicion_y += 15
 
+        # disparo
+        if teclas[pygame.K_SPACE]:
+            self.disparar()
+            self.disparar_alas()
+
         # Actualizo la posición del personaje
         self.rect.x += self.posicion_x
         self.rect.y += self.posicion_y
@@ -102,6 +113,19 @@ class Jugador(pygame.sprite.Sprite):
         # si el lado superior del rectángulo sobrepasa el borde superior
         if self.rect.top < 0:
             self.rect.top = 0 # establezo la pos del lado superior en 0
+
+    def disparar(self):
+        # creo un objeto disparo y le paso como parámetro el centro del jugador y su borde superior
+        bala = Disparo(self.rect.centerx, self.rect.top + 20)
+        balas.add(bala)
+
+    def disparar_alas(self):
+        # creo un objeto disparo y le paso como parámetro el centro del jugador y su borde superior
+        balaDerecha = Disparo(self.rect.centerx + 20, self.rect.top + 40)
+        balas.add(balaDerecha)
+
+        balaIzquierda = Disparo(self.rect.centerx - 20, self.rect.top + 40)
+        balas.add(balaIzquierda)
 
 
 class Enemigo(pygame.sprite.Sprite):
@@ -139,11 +163,43 @@ class Enemigo(pygame.sprite.Sprite):
        # ------------------ MARGENES DE MOVIMIENTO ----------------------
 
         # al llegar a los bordes derecho o izquierdo
-        if self.rect.right > ANCHO or self.rect.left < 0:
-            self.posicion_x *= -1  # invierto la dirección en x
+        if self.rect.right > ANCHO:
+            self.posicion_x -= 1  # invierto la dirección en x
+        if self.rect.left < 0:
+            self.posicion_x += 1
         # al llegar a los bordes inferior o superior
-        if self.rect.bottom > ALTO or self.rect.top < 0:
-            self.posicion_y *= -1  # invierto la dirección en y
+        if self.rect.bottom > ALTO:
+            self.posicion_y -= 1  # invierto la dirección en y
+        if self.rect.top < 0:
+            self.posicion_y += 1
+
+class Disparo(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+
+        self.image = pygame.image.load("recursos/juego_spaceShip/disparo.png").convert()
+        self.image.set_colorkey(NEGRO) # elimino fondo negro
+
+        # redimensiono la imagen porque la original es muy grande
+        self.image = pygame.transform.scale(self.image, (5, 15))
+
+        # obtengo el rectángulo de la imagen
+        self.rect = self.image.get_rect()
+
+        # ubico el lado inferior del disparo de acuerdo a la y recibida como parámetro
+        self.rect.bottom = y
+        # centro el disparo de acuerdo a la x recibida como parámetro
+        self.rect.centerx = x
+
+    def update(self):
+        self.rect.y -= 20 # velocidad del disparo (incremento hacia arriba)
+
+        # si el disparo sale por el lado superior de la pantalla, se elimina
+        if self.rect.bottom < 0:
+            self.kill()
+
+
+
 
 # ------------------------------------------------------------------------
 
@@ -170,13 +226,19 @@ sprites = pygame.sprite.Group()
 
 enemigos = pygame.sprite.Group()
 
+balas = pygame.sprite.Group()
+
+
 # -------------- ENEMIGOS
 # los ubico de primeras para que el jugador quede en la capa superior
 
 # rango de 0 a 5 (+1 es para que siempre aparezca por lo menos 1 enemigo)
-for i in range(random.randrange(4) + 1):
+"""for i in range(random.randrange(4) + 1):
     enemigo = Enemigo()
-    enemigos.add(enemigo)
+    enemigos.add(enemigo)"""
+
+enemigo = Enemigo()
+enemigos.add(enemigo)
 
 # ------------- JUGADOR
 
@@ -202,20 +264,39 @@ while ejecutando:
         if event.type == pygame.QUIT:
             ejecutando = False
 
+    pantalla.blit(fondo, (0,0))
+
     # Actualizo el estado de cada sprite en el juego
     sprites.update()
     enemigos.update()
+    balas.update()
 
-    # Relleno la pantalla de color negro
-    pantalla.fill(NEGRO)
+    # Colisiones (el objeto que provoca la colisión, grupo de sprites colisionados)
+    # False es para que no se elimine el objeto enemigo
+    colision = pygame.sprite.spritecollide(jugador, enemigos, False)
+
+    # Si se produce una colisión
+    if colision:
+        # el enemigo se convierte en una bola de fuego
+        enemigo.image = pygame.image.load("recursos/juego_spaceShip/bolaFuego.png").convert()
+        enemigo.image.set_colorkey(NEGRO)  # elimino fondo negro
+
+        # redimensiono la imagen porque la original es muy grande (640, 320)
+        enemigo.image = pygame.transform.scale(enemigo.image, (50, 50))
+
+        # caerá por la pantalla
+        enemigo.posicion_y += 7;
+
+    # Cuando haya caído hasta el final, se elimina
+    elif enemigo.rect.top > ALTO:
+        enemigo.kill()
+
 
     # Dibujo los sprites en la pantalla, con el método draw del grupo de sprites
     sprites.draw(pantalla)
     enemigos.draw(pantalla)
+    balas.draw(pantalla)
 
-    # Dibujo 2 líneas para crear un plano cartesiano
-    pygame.draw.line(pantalla, H_50D2FE, (400, 0), (400, 800), 1)
-    pygame.draw.line(pantalla, AZUL, (0, 300), (800, 300), 1)
 
     # Actualizo la ventana con los cambios realizados
     pygame.display.flip()
