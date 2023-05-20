@@ -1,1 +1,1 @@
-# Seguimiento del curso de Pygame de YouTube: https://youtube.com/playlist?list=PLVzwufPir356RMxSsOccc38jmxfxqfBdp
+Repositorio para el curso de [Pygame desde cero](https://youtube.com/playlist?list=PLVzwufPir356RMxSsOccc38jmxfxqfBdp) de YouTube
